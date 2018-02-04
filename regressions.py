@@ -5,28 +5,16 @@ from sklearn.linear_model import LogisticRegression
 import itertools
 from time import time
 
-def get_data():
-    df = pd.read_csv('./data/president_counties.csv')
+def get_data(filepath):
+    df = pd.read_csv(filepath)
     df['inc_per_filer'] = df.AGI/df.num_returns
     df['clinton_win'] = 0
-    df.loc[df.clinton>df.trump,'clinton_win'] = 1 # set up target variabl
+    df.loc[df.clinton>df.trump,'clinton_win'] = 1 # set up target variable
     test_cols = df.columns[8:-1]
     y_var = df.clinton_win
     test_df = df[test_cols]
 
     return test_df, y_var
-
-# test each var individually
-def one_var(df,y):
-    scores = {}
-    for var in test_df.columns:
-        X = df[var]
-        X_reshaped = X.values.reshape(-1,1)
-        model = lr.fit(X_reshaped,y_var)
-        score = model.score(X_reshaped,y_var)
-        scores[var] = score
-        print(var, score)
-    return scores
 
 def comb_vars(df,y):
     t0 = time()
@@ -52,11 +40,11 @@ def comb_vars(df,y):
     print("complete in {:.2f} seconds".format(time()-t0))
     return scores
 
-def main():
-    df_test,y_var = get_data()
+def calc_log_regs(filepath):
+    df_test,y_var = get_data(filepath)
     scores = comb_vars(df_test,y_var)
     sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
     print(sorted_scores[:10])
 
 if __name__ == "__main__":
-    main()
+    calc_log_regs('./data/president_counties.csv')
