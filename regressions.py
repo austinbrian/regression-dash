@@ -19,6 +19,7 @@ def get_data(filepath):
 def comb_vars(df,y):
     t0 = time()
     scores = {}
+    models = {}
     iterations = []
     lr = LogisticRegression()
     for i in range(1,len(df.columns)):
@@ -34,17 +35,37 @@ def comb_vars(df,y):
         model = lr.fit(X,y)
         score = model.score(X,y)
         scores[tuple(i)]= score
+        models[tuple(i)] = model
         sys.stdout.write('\033[F') # moves to the last line
         sys.stdout.write('\033[K') # erases the last line
 
     print("complete in {:.2f} seconds".format(time()-t0))
-    return scores
+    return scores, models
+
+def get_probas(df, models):
+    pf = pd.DataFrame(data = df.copy())
+    for features in models.keys(): 
+        model = models[features]
+        if len(features)>1:
+            X_features = pf.loc[:, list(features)]
+        elif len(features)==1:
+            X_features = pf.loc[:,features]
+        pd.loc[:,features] = model.predict_proba(df[X_features])
+    return pd
+
 
 def calc_log_regs(filepath):
     df_test,y_var = get_data(filepath)
-    scores = comb_vars(df_test,y_var)
+    scores, models = comb_vars(df_test,y_var)
     sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
     print(sorted_scores[:10])
+    return sorted_scores
 
 if __name__ == "__main__":
-    calc_log_regs('./data/president_counties.csv')
+    # calc_log_regs('./data/president_counties.csv')
+
+    df_test, y_var = get_data('./data/president_counties.csv')
+    scores, models = comb_vars(df_test,y_var)
+    df = get_probas(df_test, models)
+    print(df.head())
+
