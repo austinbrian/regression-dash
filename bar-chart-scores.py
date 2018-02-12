@@ -26,7 +26,7 @@ def make_data():
     return scores, probas
 
 scores, probas = make_data()
-var_iterations = scores.keys()
+var_iterations = list(scores.keys())
 
 app = dash.Dash()
 app.css.append_css({'external_url':'https://codepen.io/chriddyp/pen/bWLwgP.css'})
@@ -38,7 +38,8 @@ app.layout = html.Div([
             html.Label('Combinations of variables'),
             dcc.Dropdown(
                 id='var-select',
-                options=[{'label': i, 'value': i} for i in var_iterations]
+                options=[{'label': i, 'value': i} for i in var_iterations],
+                value=var_iterations[0]
             ),
             html.Label('Sort type'),
             dcc.RadioItems(
@@ -68,14 +69,14 @@ def update_r_score(input_value):
          dash.dependencies.Input('sort-type','value')]
          )
 def update_graph(var_selection,sort):
-    if sort=="Descending":
+    if sort=="Decreasing":
         sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-    elif sort == 'Ascending':
+    elif sort == 'Increasing':
         sorted_scores = sorted(scores.items(), key=lambda x: x[1])
     return { 
             'data':[go.Bar(
-            x = list(sorted_scores.keys()),
-            y = list(sorted_scores.values()),
+            x = list(sorted_scores),
+            y = list(scores.values()),
             )], 
             'layout': go.Layout(
             title = 'Range of regression values',
