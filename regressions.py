@@ -100,5 +100,4 @@ if __name__ == "__main__":
     df_test, y_var = get_data('./data/president_counties.csv')
     # df_test, y_var = get_data(sys.argv[1])
     scores, probas = comb_vars(df_test,y_var)
-    return scores, probas
 
